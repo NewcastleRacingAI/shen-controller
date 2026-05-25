@@ -27,8 +27,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "nrai_controller_ros = nrai_pathplanning.ros_node:main",
-            "nrai_controller_nims = nrai_pathplanning.nims_node:main",
+            "nrai_controller_ros = nrai_controller.ros_node:main",
+            "nrai_controller_nims = nrai_controller.nims_node:main",
         ],
     },
 )
