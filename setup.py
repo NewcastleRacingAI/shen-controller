@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'py_pubsub'
+package_name = 'nrai_controller'
 
 setup(
     name=package_name,
@@ -21,9 +21,14 @@ setup(
         'test': [
             'pytest',
         ],
+        "standalone": [
+            "nrai_rosutils @ git+https://github.com/NewcastleRacingAI/nrai_rosutils.git",
+        ],
     },
     entry_points={
         'console_scripts': [
+            "nrai_controller_ros = nrai_pathplanning.ros_node:main",
+            "nrai_controller_nims = nrai_pathplanning.nims_node:main",
         ],
     },
 )

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright 2016 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,24 +16,25 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import String
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
+from ackermann_msgs.msg import AckermannDriveStamped, AckermannDrive
+from nav_msgs.msg import Path
 
+import math
+
+from .purepursuit import get_angle
 
 class MinimalPublisher(Node):
 
     def __init__(self):
-        super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(String, 'topic', 10)
-        timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
+        super().__init__('nrai_controller')
+        self.publisher_cmd = self.create_publisher(AckermannDriveStamped, '/cmd', 10)
+        self.subscriber_path = self.create_subscription(Path, '/path', self.process, 10)
 
-    def timer_callback(self):
-        msg = String()
-        msg.data = 'Hello World: %d' % self.i
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
+    def process(self, msg):
+        drive = AckermannDriveStamped()
+        get_angle(msg.poses, drive.drive)
+        #self.publisher_cmd.publish(get_angle(msg.poses))
 
 
 def main(args=None):
@@ -42,9 +44,6 @@ def main(args=None):
 
     rclpy.spin(minimal_publisher)
 
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
     minimal_publisher.destroy_node()
     rclpy.shutdown()
 
