@@ -11,7 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', "numpy==1.26.4"],
     zip_safe=True,
     maintainer='ros',
     maintainer_email='ros@todo.todo',
@@ -28,7 +28,7 @@ setup(
     entry_points={
         'console_scripts': [
             "nrai_controller_ros = nrai_controller.ros_node:main",
-            "nrai_controller_nims = nrai_controller.nims_node:main",
+            "nrai_controller_nims = nrai_controller.ros_node:nims",
         ],
     },
 )
