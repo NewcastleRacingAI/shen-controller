@@ -1,17 +1,16 @@
 import math
-from geometry_msgs.msg import PoseStamped
 
 def get_angle(path: object, drive: object) -> object:
 
     lookahead_distance = 2
     wheel_base = 1.53
 
-    path.insert(0, PoseStamped())
+    path.insert(0, (float(0), float(0)))
     for i in range(0, len(path)-1):
         gradient = float(999)
-        if (path[i].pose.position.x - path[i+1].pose.position.x) != 0:
-            gradient = (path[i].pose.position.z - path[i+1].pose.position.z)/(path[i].pose.position.x - path[i+1].pose.position.x)
-        constant = path[i].pose.position.z - (gradient*path[i].pose.position.x)
+        if (path[i][0] - path[i+1][0]) != 0:
+            gradient = (path[i][1] - path[i+1][1])/(path[i][0] - path[i+1][0])
+        constant = path[i][1] - (gradient*path[i][0])
 
         a = 1 + math.pow(gradient, 2)
         b = 2 * gradient * constant
@@ -26,11 +25,11 @@ def get_angle(path: object, drive: object) -> object:
             yplus = (gradient * xplus) + constant
             yminus = (gradient * xminus) + constant
 
-            if min(path[i+1].pose.position.x, path[i].pose.position.x) <= xplus <= max(path[i+1].pose.position.x, path[i].pose.position.x):
+            if min(path[i+1][0], path[i][0]) <= xplus <= max(path[i+1][0], path[i][0]):
                 a = (math.atan(yplus/xplus) % math.pi) - math.pi/2
                 angle = math.atan(2 * wheel_base * math.sin(a)/(lookahead_distance))
                 drive.steering_angle = angle
-            elif min(path[i+1].pose.position.x, path[i].pose.position.x) <= xminus <= max(path[i+1].pose.position.x, path[i].pose.position.x):
+            elif min(path[i+1][0], path[i][0]) <= xminus <= max(path[i+1][0], path[i][0]):
                 a = (math.atan(yminus/xminus) % math.pi) - math.pi/2
                 angle = math.atan(2 * wheel_base * math.sin(a)/(lookahead_distance))
                 drive.steering_angle = angle
