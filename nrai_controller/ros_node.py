@@ -5,7 +5,7 @@ import math
 
 from .purepursuit import get_angle
 
-fifo_in = '/opt/PATHPLANNING_Path'
+fifo_in = '/tmp/PATHPLANNING_Path'
 fifo_out = '/tmp/lower_ctrl_cmd'
 
 class AckermannDrive():
