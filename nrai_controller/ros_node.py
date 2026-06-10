@@ -2,6 +2,7 @@
 import struct
 import os
 import math
+import time
 
 from purepursuit import get_angle
 
@@ -19,33 +20,35 @@ class AckermannDrive():
 
 def main(args=None):
     
-    try:
-        fd_in = os.open(fifo_in, os.O_WRONLY)
-        with open(fd_in, "wb") as file:
-            print(f"NRAI_CONTROLLER: Successfully opened {fifo_in}.")
-            while True:
-                path = pickle.load(file)
-                drive = AckermannDrive()
-                
-                get_angle(path, drive)
-                steering_angle_velocity = float(1)
-                speed = float(0.5)
-                acceleration = float(0.25)
-                jerk = float(0.1)
-                
-                new_instruction = struct.pack('<5fI', drive.steering_angle, drive.steering_angle_velocity, drive.speed, drive.acceleration, drive.jerk, 0xFFFFFFFF)
-                try:
-                    fd = os.open(fifo_out, os.O_WRONLY)
-                    with open(fd, "wb") as fifo:
-                        fifo.write(new_instruction)
-                except FileNotFoundError:
-                    print(f"NRAI_CONTROLLER: Could not access FIFO {fifo_out}. Likely not yet configured.")
-                except BrokenPipeError:
-                    print(f"NRAI_CONTROLLER: FIFO {fifo_out} terminated.")
-    except FileNotFoundError:
-        print(f"NRAI_CONTROLLER: Could not access FIFO {fifo_in}. Likely not yet configured.")
-    except BrokenPipeError:
-        print(f"NRAI_CONTROLLER: FIFO {fifo_in} terminated.")
+    while True:
+        try:
+            fd_in = os.open(fifo_in, os.O_RDONLY)
+            with open(fd_in, "rb") as file:
+                print(f"NRAI_CONTROLLER: Successfully opened {fifo_in}.")
+                while True:
+                    path = pickle.load(file)
+                    drive = AckermannDrive()
+                    
+                    get_angle(path, drive)
+                    steering_angle_velocity = float(1)
+                    speed = float(0.5)
+                    acceleration = float(0.25)
+                    jerk = float(0.1)
+                    
+                    new_instruction = struct.pack('<5fI', drive.steering_angle, drive.steering_angle_velocity, drive.speed, drive.acceleration, drive.jerk, 0xFFFFFFFF)
+                    try:
+                        fd = os.open(fifo_out, os.O_WRONLY)
+                        with open(fd, "wb") as fifo:
+                            fifo.write(new_instruction)
+                    except FileNotFoundError:
+                        print(f"NRAI_CONTROLLER: Could not access FIFO {fifo_out}. Likely not yet configured.")
+                    except BrokenPipeError:
+                        print(f"NRAI_CONTROLLER: FIFO {fifo_out} terminated.")
+        except FileNotFoundError:
+            print(f"NRAI_CONTROLLER: Could not access FIFO {fifo_in}. Likely not yet configured.")
+            time.sleep(0.5)
+        except BrokenPipeError:
+            print(f"NRAI_CONTROLLER: FIFO {fifo_in} terminated.")
 
 if __name__ == '__main__':
     main()
